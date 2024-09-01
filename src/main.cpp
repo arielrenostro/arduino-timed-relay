@@ -112,6 +112,26 @@ void processValveLoop()
   }
 }
 
+void processDisplayLoop()
+{
+  if (!timerController.isUpdated())
+  {
+    return;
+  }
+  timerController.getTextualValue(&timerBuff);
+
+  display.setCursor(3, 10);
+  Serial.print("Timer: ");
+
+  for (uint8_t i = 0; i < 5; i++)
+  {
+    Serial.print(timerBuff[i]);
+    display.print(timerBuff[i]);
+  }
+  display.display();
+  Serial.print("\n");
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -132,26 +152,6 @@ void setup()
   display.setCursor(3, 3);
   display.println(F("Water Value Timed"));
   display.display();
-}
-
-void processDisplayLoop()
-{
-  if (!timerController.isUpdated())
-  {
-    return;
-  }
-  timerController.getTextualValue(&timerBuff);
-
-  display.setCursor(3, 10);
-  Serial.print("Timer: ");
-
-  for (uint8_t i = 0; i < 5; i++)
-  {
-    Serial.print(timerBuff[i]);
-    display.print(timerBuff[i]);
-  }
-  display.display();
-  Serial.print("\n");
 }
 
 void loop()
