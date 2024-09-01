@@ -52,6 +52,44 @@ TimerController timerController(TIMER_DEFAULT_VALUE);
 PushButton *pushedButton = nullptr;
 char timerBuff[5] = {'0', '0', ':', '0', '0'};
 
+// function declarations
+void processPushButtonsLoop();
+void processTimerLoop();
+void processValveLoop();
+void processDisplayLoop();
+
+// main functions
+void setup()
+{
+  Serial.begin(115200);
+
+  valve.setup();
+  pushButtonController.setup();
+
+  if (!display.setup())
+  {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;)
+      ; // Don't proceed, loop forever
+  }
+
+  display.drawRect(1, 1, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(3, 3);
+  display.println(F("Water Value Timed"));
+  display.display();
+}
+
+void loop()
+{
+  processPushButtonsLoop();
+  processTimerLoop();
+  processValveLoop();
+  processDisplayLoop();
+}
+
+// functions implementations
 void processPushButtonsLoop()
 {
   pushedButton = pushButtonController.onLoop();
@@ -121,7 +159,7 @@ void processDisplayLoop()
   timerController.getTextualValue(&timerBuff);
 
   display.setCursor(3, 10);
-  Serial.print("Timer: ");
+  Serial.print(F("Screen Timer: "));
 
   for (uint8_t i = 0; i < 5; i++)
   {
@@ -130,34 +168,4 @@ void processDisplayLoop()
   }
   display.display();
   Serial.print("\n");
-}
-
-void setup()
-{
-  Serial.begin(115200);
-
-  valve.setup();
-  pushButtonController.setup();
-
-  if (!display.setup())
-  {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ; // Don't proceed, loop forever
-  }
-
-  display.drawRect(1, 1, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(3, 3);
-  display.println(F("Water Value Timed"));
-  display.display();
-}
-
-void loop()
-{
-  processPushButtonsLoop();
-  processTimerLoop();
-  processValveLoop();
-  processDisplayLoop();
 }
