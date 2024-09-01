@@ -1,6 +1,6 @@
 # Arduino Timed Relay
 
-A C++ POO Arduino project of a timer for a relay. It uses a relay module, an OLED 0.96 inch display for timer visualization and 4 push buttons to operate it. These buttons have the following behaviors:
+A C++ POO Arduino PlatformIO project of a timer for a relay. It uses a relay module, an OLED 0.96 inch display for timer visualization and 4 push buttons to operate it. These buttons have the following behaviors:
 - Up: Increase timer in 30s (hold will increase in 1min)
 - Down: Decrease timer in 30s (hold will decrease in 1min)
 - Start: Starts the timer and opens the valve
