@@ -122,6 +122,7 @@ void processPushButtonsLoop()
     else if (&buttonConfirm == pushedButton)
     {
       timerController.start();
+      cleanTimerController.cancel();
     }
   }
 }
@@ -134,7 +135,6 @@ void processTimerLoop()
 
     if (!timerController.isRunning())
     {
-      cleanTimerController.setTime(TIMER_CLEAN_VALUE);
       cleanTimerController.start();
     }
   }
