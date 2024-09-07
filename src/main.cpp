@@ -6,6 +6,7 @@
 #include "components/PushButton.h"
 #include "controllers/PushButtonController.h"
 #include "controllers/TimerController.h"
+#include "controllers/UIController.h"
 
 #include <SPI.h>
 #include <Wire.h>
@@ -23,17 +24,18 @@
 
 #define BUTTON_UP_PIN 4
 #define BUTTON_DOWN_PIN 5
-#define BUTTON_CANCEL_PIN 6
-#define BUTTON_CONFIRM_PIN 7
+#define BUTTON_CANCEL_PIN 7
+#define BUTTON_CONFIRM_PIN 6
 
 // Declaration for "ui" behaviors
 #define BUTTON_HOLD_DELAY 600
 #define BUTTON_HOLD_REPEAT_DELAY 300
 
 // Declaration for timer behaviors
-#define TIMER_DEFAULT_VALUE (uint32_t)(3 * 60) // 120s | 3min
-#define TIMER_STEP (uint32_t)30                // 30s
-#define TIMER_STEP_HOLDING (uint32_t)60        // 60s
+#define TIMER_CLEAN_VALUE (uint32_t)(8 * 60 * 60) // 28.800 | 8h
+#define TIMER_DEFAULT_VALUE (uint32_t)(3 * 60)    // 120s   | 3min
+#define TIMER_STEP (uint32_t)30                   // 30s
+#define TIMER_STEP_HOLDING (uint32_t)60           // 60s
 
 // Objects
 Relay valve(VALVE_RELAY_PIN, VALVE_RELAY_START_STATE);
@@ -47,10 +49,11 @@ PushButton buttonConfirm(BUTTON_CONFIRM_PIN);
 PushButton *x[4] = {&buttonUp, &buttonDown, &buttonCancel, &buttonConfirm};
 PushButtonController pushButtonController(Vector<PushButton *>(x, 4), BUTTON_HOLD_DELAY, BUTTON_HOLD_REPEAT_DELAY);
 TimerController timerController(TIMER_DEFAULT_VALUE);
+TimerController cleanTimerController(TIMER_CLEAN_VALUE);
+UIController uiController(&display, &timerController, &cleanTimerController);
 
 // state variables
 PushButton *pushedButton = nullptr;
-char timerBuff[5] = {'0', '0', ':', '0', '0'};
 
 // function declarations
 void processPushButtonsLoop();
@@ -66,19 +69,14 @@ void setup()
   valve.setup();
   pushButtonController.setup();
 
-  if (!display.setup())
+  if (!uiController.setup())
   {
     Serial.println(F("SSD1306 allocation failed"));
     for (;;)
-      ; // Don't proceed, loop forever
+    {
+      // Don't proceed, loop forever
+    }
   }
-
-  display.drawRect(1, 1, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(3, 3);
-  display.println(F("Water Value Timed"));
-  display.display();
 }
 
 void loop()
@@ -130,7 +128,20 @@ void processPushButtonsLoop()
 
 void processTimerLoop()
 {
-  timerController.onLoop();
+  if (timerController.isRunning())
+  {
+    timerController.onLoop();
+
+    if (!timerController.isRunning())
+    {
+      cleanTimerController.setTime(TIMER_CLEAN_VALUE);
+      cleanTimerController.start();
+    }
+  }
+  else if (cleanTimerController.isRunning())
+  {
+    cleanTimerController.onLoop();
+  }
 }
 
 void processValveLoop()
@@ -152,20 +163,5 @@ void processValveLoop()
 
 void processDisplayLoop()
 {
-  if (!timerController.isUpdated())
-  {
-    return;
-  }
-  timerController.getTextualValue(&timerBuff);
-
-  display.setCursor(3, 10);
-  Serial.print(F("Screen Timer: "));
-
-  for (uint8_t i = 0; i < 5; i++)
-  {
-    Serial.print(timerBuff[i]);
-    display.print(timerBuff[i]);
-  }
-  display.display();
-  Serial.print("\n");
+  uiController.onLoop();
 }

@@ -1,3 +1,6 @@
+#ifndef TimerController_C
+#define TimerController_C
+
 #include <Arduino.h>
 
 class TimerController
@@ -13,13 +16,14 @@ public:
     TimerController(uint32_t default_);
     void addTime(uint32_t value);
     void subTime(uint32_t value);
+    void setTime(uint32_t value);
     void cancel();
     void start();
     void onLoop();
     bool isRunning();
     bool isUpdated();
     int32_t getValue();
-    void getTextualValue(char (*value)[5]);
+    void getTextualValue(char (*value)[7]);
 };
 
 TimerController::TimerController(uint32_t default_)
@@ -39,6 +43,18 @@ void TimerController::addTime(uint32_t value)
 void TimerController::subTime(uint32_t value)
 {
     _timer -= value * 1000;
+    if (_timer < 0)
+    {
+        _timer = 0;
+    }
+
+    Serial.print(F("Timer: "));
+    Serial.println(_timer);
+}
+
+void TimerController::setTime(uint32_t value)
+{
+    _timer = value * 1000;
     if (_timer < 0)
     {
         _timer = 0;
@@ -106,16 +122,19 @@ int32_t TimerController::getValue()
     return _timer;
 }
 
-void TimerController::getTextualValue(char (*value)[5])
+void TimerController::getTextualValue(char (*value)[7])
 {
-    uint8_t minutes = _timer / 1000 / 60;
+    uint8_t hours = _timer / 1000 / 60 / 60;
+    uint8_t minutes = _timer / 1000 / 60 % 60;
     uint8_t seconds = _timer / 1000 % 60;
 
-    (*value)[0] = *utoa(minutes / 10, NULL, 10);
-    (*value)[1] = *utoa(minutes % 10, NULL, 10);
-    (*value)[2] = ':';
-    (*value)[3] = *utoa(seconds / 10, NULL, 10);
-    (*value)[4] = *utoa(seconds % 10, NULL, 10);
+    (*value)[0] = *utoa(hours, NULL, 10);
+    (*value)[1] = ':';
+    (*value)[2] = *utoa(minutes / 10, NULL, 10);
+    (*value)[3] = *utoa(minutes % 10, NULL, 10);
+    (*value)[4] = ':';
+    (*value)[5] = *utoa(seconds / 10, NULL, 10);
+    (*value)[6] = *utoa(seconds % 10, NULL, 10);
 }
 
 bool TimerController::isUpdated()
@@ -127,3 +146,5 @@ bool TimerController::isUpdated()
     }
     return false;
 }
+
+#endif

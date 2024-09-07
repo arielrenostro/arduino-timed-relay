@@ -56,7 +56,7 @@ void Relay::turnOn()
     return;
   }
   Serial.println(" ON");
-  digitalWrite(_pin, LOW);
+  digitalWrite(_pin, HIGH);
   _state = RELAY_STATE_ON;
 }
 
@@ -70,7 +70,7 @@ void Relay::turnOff()
     return;
   }
   Serial.println(F(" OFF"));
-  digitalWrite(_pin, HIGH);
+  digitalWrite(_pin, LOW);
   _state = RELAY_STATE_OFF;
 }
 

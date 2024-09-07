@@ -1,3 +1,6 @@
+#ifndef Display_C
+#define Display_C
+
 #include "IBaseComponent.h"
 
 #include <Arduino.h>
@@ -10,23 +13,31 @@ class Display : public IBaseComponent
 {
 private:
   Adafruit_SSD1306 _display;
+  uint8_t _width;
+  uint8_t _height;
 
 public:
-  Display(int width, int height, TwoWire *wire, int oledReset);
+  Display(uint8_t width, uint8_t height, TwoWire *wire, int oledReset);
 
   bool setup();
+  uint8_t getWidth();
+  uint8_t getHeight();
   void clearDisplay();
   void setTextSize(uint8_t i);
   void setTextColor(int c);
   void setCursor(int16_t x, int16_t y);
-  void drawRect(int16_t x, int16_t y, int16_t width, int16_t height, uint16_t color);
+  void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+  void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+  void drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
   void print(char v);
   void println(const __FlashStringHelper *ifsh);
   void display();
 };
 
-Display::Display(int width, int height, TwoWire *wire, int oledReset)
+Display::Display(uint8_t width, uint8_t height, TwoWire *wire, int oledReset)
 {
+  _width = width;
+  _height = height;
   _display = Adafruit_SSD1306(width, height, wire, oledReset);
 }
 
@@ -41,6 +52,16 @@ bool Display::setup()
   }
   Serial.println(F("Display: Failed"));
   return false;
+}
+
+uint8_t Display::getWidth()
+{
+  return _width;
+}
+
+uint8_t Display::getHeight()
+{
+  return _height;
 }
 
 void Display::clearDisplay()
@@ -78,7 +99,19 @@ void Display::display()
   _display.display();
 }
 
-void Display::drawRect(int16_t x, int16_t y, int16_t width, int16_t height, uint16_t color)
+void Display::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
-  _display.drawRect(x, y, width, height, color);
+  _display.drawRect(x, y, w, h, color);
 }
+
+void Display::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+{
+  _display.fillRect(x, y, w, h, color);
+}
+
+void Display::drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg)
+{
+  return _display.drawBitmap(x, y, bitmap, w, h, color, bg);
+}
+
+#endif
