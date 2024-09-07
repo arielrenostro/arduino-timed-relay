@@ -118,6 +118,7 @@ void processPushButtonsLoop()
     else if (&buttonCancel == pushedButton)
     {
       timerController.cancel();
+      cleanTimerController.start();
     }
     else if (&buttonConfirm == pushedButton)
     {
