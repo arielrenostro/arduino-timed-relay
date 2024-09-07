@@ -88,11 +88,6 @@ void UIController::onLoop()
     {
         _drawTimer();
     }
-
-    // if (_nextCleaningTime < millis())
-    // {
-    //     _needToClean = true;
-    // }
 }
 
 void UIController::_clearTitle()
